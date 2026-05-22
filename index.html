@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solar Plant AI Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>☀️ Solar Plant AI Planner</h1>
+    <p class="sub">NASA + PVGIS + Kenbrook + Auto Electricity Rate + AI Learning System!</p>
+
+    <div class="form-card">
+        <div class="input-box">
+            <h3>📍 Enter Location (Coordinates OR Name)</h3>
+            <div class="grid2">
+                <div>
+                    <label>🌐 Latitude (optional if name given)</label>
+                    <input type="number" id="lat" placeholder="e.g. 17.9784" step="0.0001"/>
+                </div>
+                <div>
+                    <label>🌐 Longitude (optional if name given)</label>
+                    <input type="number" id="lon" placeholder="e.g. 79.5300" step="0.0001"/>
+                </div>
+            </div>
+            <div class="or-divider">— OR —</div>
+            <div>
+                <label>🔍 Location Name (AI finds coordinates automatically)</label>
+                <input type="text" id="locName" placeholder="e.g. NIT Warangal, Telangana"/>
+            </div>
+            <div class="coord-display" id="coord_display">📍 Enter coordinates or location name above</div>
+        </div>
+
+        <div class="grid3">
+            <div>
+                <label>📐 Area (Square Meters)</label>
+                <input type="number" id="area" value="1000" min="100"/>
+            </div>
+            <div>
+                <label>⚡ Panel Type</label>
+                <select id="paneltype">
+                    <option value="Monocrystalline">Monocrystalline (Best)</option>
+                    <option value="Polycrystalline">Polycrystalline (Standard)</option>
+                    <option value="Thin Film">Thin Film (Budget)</option>
+                </select>
+            </div>
+            <div>
+                <label>🏗️ Project Type</label>
+                <select id="projtype">
+                    <option value="Residential">Residential</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="Industrial">Industrial</option>
+                    <option value="Agricultural">Agricultural</option>
+                </select>
+            </div>
+        </div>
+        <div style="background:#e8f4f8;padding:10px;border-radius:6px;margin-top:10px;font-size:13px;color:#006994">
+            ⚡ Electricity rate will be auto-scraped from your location — no manual input needed!
+        </div>
+        <button class="btn2" onclick="getAIReport()">🤖 Scrape All Sources + AI Report + Map</button>
+    </div>
+
+    <div class="result" id="result">
+        <div class="status" id="status_box"></div>
+        <div class="metrics" id="metrics" style="margin-top:15px"></div>
+
+        <div class="section" id="map_section" style="display:none">
+            <h3>🗺️ Your Land on Map</h3>
+            <iframe id="map_frame"></iframe>
+            <h3 style="margin-top:15px">🛰️ Multi-Source Scraped Data</h3>
+            <div id="source_info"></div>
+            <div class="weather-grid" id="weather_box"></div>
+        </div>
+
+        <div class="section">
+            <h3>🔧 Equipment Required (Kenbrook Solar Prices)</h3>
+            <div id="equipment"></div>
+        </div>
+        <div class="section">
+            <h3>💰 Cost Breakdown</h3>
+            <div id="costs"></div>
+        </div>
+        <div class="section">
+            <h3>📈 ROI & Recovery</h3>
+            <div id="roi"></div>
+        </div>
+        <div class="section">
+            <h3>🤖 AI Analysis</h3>
+            <div class="ai-box" id="ai_answer">Analyzing...</div>
+        </div>
+
+        <div class="feedback-box" id="feedback_box">
+            <p>🎯 Was this prediction accurate? Help the AI learn!</p>
+            <button class="btn-correct" onclick="sendFeedback(1)">👍 Correct Prediction</button>
+            <button class="btn-wrong" onclick="sendFeedback(-1)">👎 Wrong Prediction</button>
+            <br>
+            <input type="text" class="correction-input" id="correction"
+                placeholder="What was actual PSH / ROI / rate? (optional correction)"/>
+            <div class="feedback-stats" id="feedback_stats"></div>
+        </div>
+
+        <div class="warning">⚠️ Prices based on Kenbrook Solar scraping. Always get 3 quotes.</div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
