@@ -9,7 +9,7 @@ This project is built as a single static HTML file, so it can be published direc
 After publishing with GitHub Pages, your site will be available at:
 
 ```text
-https://your-username.github.io/your-repository-name/
+https://vedantxsh23.io/SolarAI-Planner/
 ```
 
 ## Features
@@ -58,21 +58,6 @@ You can enter:
 - Usable area in square meters
 - Panel type
 - Project type
-
-## How To Publish On GitHub Pages
-
-1. Create a new repository on GitHub.
-2. Upload these files:
-   - `index.html`
-   - `README.md`
-3. Go to repository **Settings**.
-4. Open **Pages**.
-5. Set source to **Deploy from a branch**.
-6. Select the `main` branch.
-7. Select `/root`.
-8. Click **Save**.
-
-GitHub will generate a live website link after a short wait.
 
 ## Local Preview
 
