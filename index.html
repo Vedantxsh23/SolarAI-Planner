@@ -1,108 +1,851 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Solar Plant AI Planner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solar Plant Planner</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #627080;
+      --line: #dbe3ea;
+      --paper: #ffffff;
+      --wash: #f5f8fb;
+      --sun: #f59e0b;
+      --sun-dark: #c76b00;
+      --sky: #0f7aa5;
+      --leaf: #16815c;
+      --rose: #b83b5e;
+      --shadow: 0 18px 45px rgba(23, 32, 42, 0.12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--wash);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .hero {
+      min-height: 54vh;
+      display: grid;
+      align-items: end;
+      color: #fff;
+      background:
+        linear-gradient(90deg, rgba(10, 29, 43, 0.82), rgba(10, 29, 43, 0.38)),
+        url("https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1800&q=80") center/cover;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .hero-inner {
+      padding: 42px 0 54px;
+      max-width: 760px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.11);
+      backdrop-filter: blur(8px);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-size: clamp(38px, 6vw, 78px);
+      line-height: 0.94;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 650px;
+      color: rgba(255,255,255,0.88);
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.55;
+    }
+
+    main {
+      margin-top: -32px;
+      padding-bottom: 54px;
+    }
+
+    .planner {
+      display: grid;
+      grid-template-columns: 390px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel,
+    .results,
+    .map-box,
+    .analysis {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 20px;
+      position: sticky;
+      top: 16px;
+    }
+
+    .panel h2,
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #cfd9e3;
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--sky);
+      box-shadow: 0 0 0 4px rgba(15, 122, 165, 0.14);
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 2px 0 14px;
+      color: #7b8794;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+    }
+
+    .primary {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: var(--radius);
+      color: white;
+      background: linear-gradient(135deg, var(--sun), var(--sun-dark));
+      font-weight: 850;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(245, 158, 11, 0.28);
+    }
+
+    .primary:hover {
+      filter: brightness(0.98);
+    }
+
+    .note {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .content {
+      display: grid;
+      gap: 20px;
+    }
+
+    .results {
+      padding: 18px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      color: #075985;
+      background: #e7f5fb;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      min-height: 28px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--leaf);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .metric {
+      min-height: 104px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfe;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--ink);
+      font-size: clamp(22px, 3vw, 31px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .analysis,
+    .map-box {
+      padding: 18px;
+    }
+
+    .data-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid #edf1f5;
+      font-size: 14px;
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+    }
+
+    .row span:first-child {
+      color: var(--muted);
+    }
+
+    .row b {
+      text-align: right;
+    }
+
+    .total {
+      margin-top: 12px;
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: white;
+      background: var(--sky);
+      border-radius: var(--radius);
+      font-weight: 850;
+    }
+
+    iframe {
+      width: 100%;
+      height: 330px;
+      border: 0;
+      border-radius: var(--radius);
+      background: #eef3f7;
+    }
+
+    .weather {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      padding: 10px;
+      min-height: 74px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfe;
+    }
+
+    .chip b {
+      display: block;
+      font-size: 18px;
+    }
+
+    .chip span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .verdict {
+      padding: 14px;
+      border-left: 4px solid var(--sun);
+      border-radius: var(--radius);
+      background: #fff8ed;
+      color: #5f420c;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .empty {
+      padding: 44px 18px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #b9c7d3;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.72);
+    }
+
+    .error {
+      color: #8a1f2d;
+      background: #fff1f2;
+    }
+
+    @media (max-width: 980px) {
+      .planner,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        position: static;
+      }
+
+      .metrics,
+      .weather {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .hero {
+        min-height: 48vh;
+      }
+
+      main {
+        margin-top: -18px;
+      }
+
+      .two,
+      .metrics,
+      .weather {
+        grid-template-columns: 1fr;
+      }
+
+      .status,
+      .total,
+      .row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .row b {
+        text-align: left;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <h1>☀️ Solar Plant AI Planner</h1>
-    <p class="sub">NASA + PVGIS + Kenbrook + Auto Electricity Rate + AI Learning System!</p>
-
-    <div class="form-card">
-        <div class="input-box">
-            <h3>📍 Enter Location (Coordinates OR Name)</h3>
-            <div class="grid2">
-                <div>
-                    <label>🌐 Latitude (optional if name given)</label>
-                    <input type="number" id="lat" placeholder="e.g. 17.9784" step="0.0001"/>
-                </div>
-                <div>
-                    <label>🌐 Longitude (optional if name given)</label>
-                    <input type="number" id="lon" placeholder="e.g. 79.5300" step="0.0001"/>
-                </div>
-            </div>
-            <div class="or-divider">— OR —</div>
-            <div>
-                <label>🔍 Location Name (AI finds coordinates automatically)</label>
-                <input type="text" id="locName" placeholder="e.g. NIT Warangal, Telangana"/>
-            </div>
-            <div class="coord-display" id="coord_display">📍 Enter coordinates or location name above</div>
-        </div>
-
-        <div class="grid3">
-            <div>
-                <label>📐 Area (Square Meters)</label>
-                <input type="number" id="area" value="1000" min="100"/>
-            </div>
-            <div>
-                <label>⚡ Panel Type</label>
-                <select id="paneltype">
-                    <option value="Monocrystalline">Monocrystalline (Best)</option>
-                    <option value="Polycrystalline">Polycrystalline (Standard)</option>
-                    <option value="Thin Film">Thin Film (Budget)</option>
-                </select>
-            </div>
-            <div>
-                <label>🏗️ Project Type</label>
-                <select id="projtype">
-                    <option value="Residential">Residential</option>
-                    <option value="Commercial">Commercial</option>
-                    <option value="Industrial">Industrial</option>
-                    <option value="Agricultural">Agricultural</option>
-                </select>
-            </div>
-        </div>
-        <div style="background:#e8f4f8;padding:10px;border-radius:6px;margin-top:10px;font-size:13px;color:#006994">
-            ⚡ Electricity rate will be auto-scraped from your location — no manual input needed!
-        </div>
-        <button class="btn2" onclick="getAIReport()">🤖 Scrape All Sources + AI Report + Map</button>
+  <header class="hero">
+    <div class="wrap hero-inner">
+      <div class="eyebrow">Solar feasibility calculator</div>
+      <h1>Solar Plant Planner</h1>
+      <p>Estimate capacity, project cost, annual generation, savings, payback period, seasonal sunlight and site suitability for an Indian solar installation.</p>
     </div>
+  </header>
 
-    <div class="result" id="result">
-        <div class="status" id="status_box"></div>
-        <div class="metrics" id="metrics" style="margin-top:15px"></div>
+  <main class="wrap">
+    <div class="planner">
+      <form class="panel" id="plannerForm">
+        <h2>Project Inputs</h2>
 
-        <div class="section" id="map_section" style="display:none">
-            <h3>🗺️ Your Land on Map</h3>
-            <iframe id="map_frame"></iframe>
-            <h3 style="margin-top:15px">🛰️ Multi-Source Scraped Data</h3>
-            <div id="source_info"></div>
-            <div class="weather-grid" id="weather_box"></div>
-        </div>
-
-        <div class="section">
-            <h3>🔧 Equipment Required (Kenbrook Solar Prices)</h3>
-            <div id="equipment"></div>
-        </div>
-        <div class="section">
-            <h3>💰 Cost Breakdown</h3>
-            <div id="costs"></div>
-        </div>
-        <div class="section">
-            <h3>📈 ROI & Recovery</h3>
-            <div id="roi"></div>
-        </div>
-        <div class="section">
-            <h3>🤖 AI Analysis</h3>
-            <div class="ai-box" id="ai_answer">Analyzing...</div>
+        <div class="field">
+          <label for="locName">Location name <span class="hint">or use coordinates</span></label>
+          <input id="locName" type="text" placeholder="NIT Warangal, Telangana" autocomplete="off" />
         </div>
 
-        <div class="feedback-box" id="feedback_box">
-            <p>🎯 Was this prediction accurate? Help the AI learn!</p>
-            <button class="btn-correct" onclick="sendFeedback(1)">👍 Correct Prediction</button>
-            <button class="btn-wrong" onclick="sendFeedback(-1)">👎 Wrong Prediction</button>
-            <br>
-            <input type="text" class="correction-input" id="correction"
-                placeholder="What was actual PSH / ROI / rate? (optional correction)"/>
-            <div class="feedback-stats" id="feedback_stats"></div>
+        <div class="divider">or</div>
+
+        <div class="two">
+          <div class="field">
+            <label for="lat">Latitude</label>
+            <input id="lat" type="number" step="0.0001" placeholder="17.9784" />
+          </div>
+          <div class="field">
+            <label for="lon">Longitude</label>
+            <input id="lon" type="number" step="0.0001" placeholder="79.5300" />
+          </div>
         </div>
 
-        <div class="warning">⚠️ Prices based on Kenbrook Solar scraping. Always get 3 quotes.</div>
+        <div class="field">
+          <label for="area">Usable area <span class="hint">square meters</span></label>
+          <input id="area" type="number" min="100" value="1000" />
+        </div>
+
+        <div class="field">
+          <label for="paneltype">Panel type</label>
+          <select id="paneltype">
+            <option value="Monocrystalline">Monocrystalline</option>
+            <option value="Polycrystalline">Polycrystalline</option>
+            <option value="Thin Film">Thin Film</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="projtype">Project type</label>
+          <select id="projtype">
+            <option value="Residential">Residential</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Industrial">Industrial</option>
+            <option value="Agricultural">Agricultural</option>
+          </select>
+        </div>
+
+        <button class="primary" type="submit">Calculate Project</button>
+        <p class="note">This static version works on GitHub Pages. It uses public browser APIs where available, then falls back to sensible India-focused estimates.</p>
+      </form>
+
+      <section class="content">
+        <div class="results" id="results">
+          <div class="empty">Enter a location and calculate to see your solar project report.</div>
+        </div>
+
+        <div class="grid" id="details" hidden>
+          <div class="analysis">
+            <h2 class="section-title">Equipment Required</h2>
+            <div class="data-list" id="equipment"></div>
+          </div>
+
+          <div class="analysis">
+            <h2 class="section-title">Cost Breakdown</h2>
+            <div class="data-list" id="costs"></div>
+          </div>
+
+          <div class="analysis">
+            <h2 class="section-title">ROI & Impact</h2>
+            <div class="data-list" id="roi"></div>
+          </div>
+
+          <div class="analysis">
+            <h2 class="section-title">Planner Verdict</h2>
+            <div class="verdict" id="verdict"></div>
+          </div>
+        </div>
+
+        <div class="map-box" id="mapBox" hidden>
+          <h2 class="section-title">Location & Solar Data</h2>
+          <iframe id="mapFrame" title="Project location map"></iframe>
+          <div class="weather" id="weather"></div>
+        </div>
+      </section>
     </div>
-</div>
+  </main>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    const stateRates = {
+      "andhra pradesh": 6.5,
+      "telangana": 7,
+      "karnataka": 7.2,
+      "tamil nadu": 6.8,
+      "kerala": 6.4,
+      "maharashtra": 8.5,
+      "gujarat": 6,
+      "rajasthan": 7.5,
+      "madhya pradesh": 7,
+      "uttar pradesh": 7,
+      "delhi": 8,
+      "haryana": 7.5,
+      "punjab": 7,
+      "west bengal": 7.5,
+      "odisha": 6,
+      "jharkhand": 6.5,
+      "bihar": 7,
+      "assam": 6.5,
+      "himachal pradesh": 5.5,
+      "uttarakhand": 6,
+      "goa": 4.5,
+      "chhattisgarh": 6,
+      "tripura": 6,
+      "meghalaya": 6
+    };
+
+    const panelProfiles = {
+      "Monocrystalline": { efficiency: 1, panelPrice: 18000, label: "Premium 400W panels" },
+      "Polycrystalline": { efficiency: 0.85, panelPrice: 14500, label: "Standard 400W panels" },
+      "Thin Film": { efficiency: 0.7, panelPrice: 11200, label: "Budget thin-film panels" }
+    };
+
+    const money = (value) => new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    }).format(value);
+
+    const number = (value) => new Intl.NumberFormat("en-IN").format(Math.round(value));
+
+    const byId = (id) => document.getElementById(id);
+
+    byId("plannerForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await calculate();
+    });
+
+    async function calculate() {
+      const results = byId("results");
+      results.innerHTML = '<div class="status"><span>Preparing your solar report...</span><span class="pill">Working</span></div>';
+
+      try {
+        const input = readInputs();
+        const location = await resolveLocation(input);
+        const solar = await getSolarData(location.lat, location.lon);
+        const project = buildProject(input, location, solar);
+        render(project);
+      } catch (error) {
+        results.innerHTML = '<div class="status error"><span>' + error.message + '</span><span class="pill" style="background:#b83b5e">Check input</span></div>';
+        byId("details").hidden = true;
+        byId("mapBox").hidden = true;
+      }
+    }
+
+    function readInputs() {
+      return {
+        locName: byId("locName").value.trim(),
+        lat: byId("lat").value.trim(),
+        lon: byId("lon").value.trim(),
+        area: Math.max(100, Number(byId("area").value) || 1000),
+        panelType: byId("paneltype").value,
+        projectType: byId("projtype").value
+      };
+    }
+
+    async function resolveLocation(input) {
+      if (input.lat && input.lon) {
+        const lat = Number(input.lat);
+        const lon = Number(input.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error("Please enter valid coordinates.");
+        const name = await reverseName(lat, lon);
+        return { lat, lon, name, state: findState(name) };
+      }
+
+      if (!input.locName) throw new Error("Please enter a location name or coordinates.");
+
+      const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=in&q=" + encodeURIComponent(input.locName);
+      const response = await fetch(url, { headers: { "Accept": "application/json" } });
+      const data = await response.json();
+      if (!data.length) throw new Error("I could not find that location. Try coordinates or a more specific Indian location.");
+
+      const item = data[0];
+      return {
+        lat: Number(item.lat),
+        lon: Number(item.lon),
+        name: item.display_name,
+        state: findState(item.display_name)
+      };
+    }
+
+    async function reverseName(lat, lon) {
+      try {
+        const url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon;
+        const response = await fetch(url, { headers: { "Accept": "application/json" } });
+        const data = await response.json();
+        return data.display_name || "Lat " + lat + ", Lon " + lon;
+      } catch {
+        return "Lat " + lat + ", Lon " + lon;
+      }
+    }
+
+    function findState(text) {
+      const lower = String(text || "").toLowerCase();
+      return Object.keys(stateRates).find((state) => lower.includes(state)) || "default";
+    }
+
+    async function getSolarData(lat, lon) {
+      const fallbackPsh = estimatePshByLatitude(lat);
+      const output = {
+        annualPsh: fallbackPsh,
+        nasaPsh: null,
+        summerPsh: +(fallbackPsh * 1.1).toFixed(2),
+        monsoonPsh: +(fallbackPsh * 0.78).toFixed(2),
+        winterPsh: +(fallbackPsh * 0.96).toFixed(2),
+        temp: "N/A",
+        cloud: 0,
+        uv: "N/A"
+      };
+
+      try {
+        const nasaUrl = "https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN,T2M&community=RE&longitude=" + lon + "&latitude=" + lat + "&format=JSON";
+        const response = await fetch(nasaUrl);
+        const data = await response.json();
+        const solar = data.properties.parameter.ALLSKY_SFC_SW_DWN;
+        const temp = data.properties.parameter.T2M;
+        output.nasaPsh = Number(solar.ANN).toFixed(2);
+        output.annualPsh = Number(solar.ANN);
+        output.summerPsh = average([solar.MAR, solar.APR, solar.MAY]);
+        output.monsoonPsh = average([solar.JUN, solar.JUL, solar.AUG]);
+        output.winterPsh = average([solar.DEC, solar.JAN, solar.FEB]);
+        output.temp = Number(temp.ANN).toFixed(1);
+      } catch {
+        output.nasaPsh = null;
+      }
+
+      try {
+        const weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,cloud_cover,wind_speed_10m,uv_index&timezone=auto";
+        const response = await fetch(weatherUrl);
+        const data = await response.json();
+        const current = data.current || {};
+        output.temp = current.temperature_2m ?? output.temp;
+        output.cloud = current.cloud_cover ?? 0;
+        output.uv = current.uv_index ?? "N/A";
+      } catch {}
+
+      output.effectiveSun = +(output.annualPsh * (1 - (Number(output.cloud) / 100 * 0.55))).toFixed(2);
+      return output;
+    }
+
+    function estimatePshByLatitude(lat) {
+      const value = Math.abs(Number(lat));
+      if (value > 32) return 3.8;
+      if (value > 28) return 4.5;
+      if (value > 23) return 5.2;
+      if (value > 18) return 5.5;
+      if (value > 13) return 5.3;
+      return 5.0;
+    }
+
+    function average(values) {
+      return +(values.reduce((sum, value) => sum + Number(value), 0) / values.length).toFixed(2);
+    }
+
+    function buildProject(input, location, solar) {
+      const profile = panelProfiles[input.panelType];
+      const areaUsed = input.area * 0.7;
+      const panels = Math.max(1, Math.floor(areaUsed / 1.7));
+      const capacityKw = Math.round(panels * 0.4);
+      const dailyKwh = Math.round(capacityKw * solar.effectiveSun * profile.efficiency);
+      const yearlyKwh = dailyKwh * 365;
+      const rate = stateRates[location.state] || 7;
+      const yearlyIncome = yearlyKwh * rate;
+      const panelCost = panels * profile.panelPrice;
+      const inverterCost = capacityKw * 8000;
+      const cableCost = Math.round(input.area * 1.1 * 150);
+      const mountCost = panels * 3000;
+      const batteryCost = capacityKw * 5000;
+      const installCost = capacityKw * 10000;
+      const miscCost = Math.round((panelCost + inverterCost + cableCost + mountCost + batteryCost + installCost) * 0.1);
+      const totalCost = panelCost + inverterCost + cableCost + mountCost + batteryCost + installCost + miscCost;
+      const payback = totalCost / Math.max(1, yearlyIncome);
+      const suitability = Math.max(1, Math.min(10, Math.round((solar.annualPsh / 6) * 10 - (solar.cloud / 35))));
+
+      return {
+        input,
+        location,
+        solar,
+        rate,
+        panels,
+        capacityKw,
+        dailyKwh,
+        yearlyKwh,
+        yearlyIncome,
+        costs: { panelCost, inverterCost, cableCost, mountCost, batteryCost, installCost, miscCost, totalCost },
+        payback,
+        suitability,
+        co2: yearlyKwh * 0.82 / 1000
+      };
+    }
+
+    function render(project) {
+      byId("details").hidden = false;
+      byId("mapBox").hidden = false;
+      byId("results").innerHTML = metricsMarkup(project);
+      byId("equipment").innerHTML = equipmentMarkup(project);
+      byId("costs").innerHTML = costsMarkup(project);
+      byId("roi").innerHTML = roiMarkup(project);
+      byId("verdict").innerHTML = verdictMarkup(project);
+      byId("weather").innerHTML = weatherMarkup(project);
+      renderMap(project.location);
+    }
+
+    function metricsMarkup(project) {
+      return `
+        <div class="status">
+          <span>${shortName(project.location.name)}</span>
+          <span class="pill">${project.suitability}/10 suitable</span>
+        </div>
+        <div class="metrics">
+          <div class="metric"><strong>${project.panels}</strong><span>Solar panels</span></div>
+          <div class="metric"><strong>${project.capacityKw} kW</strong><span>Plant capacity</span></div>
+          <div class="metric"><strong>${number(project.dailyKwh)}</strong><span>Daily kWh</span></div>
+          <div class="metric"><strong>${project.payback.toFixed(1)} yrs</strong><span>Payback period</span></div>
+        </div>
+      `;
+    }
+
+    function equipmentMarkup(project) {
+      const cableDc = Math.round(project.input.area * 0.8);
+      const cableAc = Math.round(project.input.area * 0.3);
+      return rows([
+        ["Solar panels", `${project.panels} units, ${panelProfiles[project.input.panelType].label}`],
+        ["Grid-tie inverter", `${project.capacityKw} kW`],
+        ["DC cables", `${number(cableDc)} meters`],
+        ["AC cables", `${number(cableAc)} meters`],
+        ["Mounting structure", `${project.panels} sets`],
+        ["Battery bank", `${number(project.capacityKw * 2)} kWh optional backup`],
+        ["Junction boxes", `${Math.ceil(project.panels / 10)} units`],
+        ["Earthing and protection", "Complete safety set"],
+        ["Net energy meter", "1 unit"]
+      ]);
+    }
+
+    function costsMarkup(project) {
+      return rows([
+        ["Solar panels", money(project.costs.panelCost)],
+        ["Inverter", money(project.costs.inverterCost)],
+        ["Cables", money(project.costs.cableCost)],
+        ["Mounting structure", money(project.costs.mountCost)],
+        ["Battery provision", money(project.costs.batteryCost)],
+        ["Installation", money(project.costs.installCost)],
+        ["Miscellaneous", money(project.costs.miscCost)]
+      ]) + `<div class="total"><span>Total investment</span><span>${money(project.costs.totalCost)}</span></div>`;
+    }
+
+    function roiMarkup(project) {
+      return rows([
+        ["Solar resource", `${project.solar.annualPsh.toFixed(2)} peak sun hours/day`],
+        ["Effective sun", `${project.solar.effectiveSun.toFixed(2)} hours/day`],
+        ["Electricity rate", `${money(project.rate)} per kWh`],
+        ["Yearly output", `${number(project.yearlyKwh)} kWh`],
+        ["Yearly savings", money(project.yearlyIncome)],
+        ["25-year gross value", money(project.yearlyIncome * 25)],
+        ["CO2 saved yearly", `${project.co2.toFixed(1)} tonnes`]
+      ]);
+    }
+
+    function verdictMarkup(project) {
+      const tilt = Math.round(Math.abs(project.location.lat));
+      const strength = project.suitability >= 8 ? "strong" : project.suitability >= 6 ? "practical" : "moderate";
+      const subsidy = project.input.projectType === "Residential"
+        ? "Residential projects may be eligible for PM Surya Ghar subsidy depending on system size and current scheme rules."
+        : "Commercial, industrial and agricultural projects should confirm state net-metering and subsidy availability before final quotation.";
+
+      return `
+        This looks like a <b>${strength}</b> solar site with an estimated payback of <b>${project.payback.toFixed(1)} years</b>.
+        The suggested fixed panel tilt is about <b>${tilt} degrees</b>, close to the site latitude.
+        Summer generation should be strongest, while monsoon cloud cover can reduce output.
+        ${subsidy} Always compare at least three EPC quotations before purchase.
+      `;
+    }
+
+    function weatherMarkup(project) {
+      return `
+        <div class="chip"><b>${project.solar.annualPsh.toFixed(2)}h</b><span>Annual PSH</span></div>
+        <div class="chip"><b>${project.solar.nasaPsh || "Estimate"}h</b><span>NASA POWER</span></div>
+        <div class="chip"><b>${project.solar.summerPsh}h</b><span>Summer PSH</span></div>
+        <div class="chip"><b>${project.solar.monsoonPsh}h</b><span>Monsoon PSH</span></div>
+        <div class="chip"><b>${project.solar.winterPsh}h</b><span>Winter PSH</span></div>
+        <div class="chip"><b>${project.solar.temp}°C</b><span>Temperature</span></div>
+        <div class="chip"><b>${project.solar.cloud}%</b><span>Cloud cover</span></div>
+        <div class="chip"><b>${project.solar.uv}</b><span>UV index</span></div>
+      `;
+    }
+
+    function rows(items) {
+      return items.map(([label, value]) => `<div class="row"><span>${label}</span><b>${value}</b></div>`).join("");
+    }
+
+    function renderMap(location) {
+      const lat = location.lat;
+      const lon = location.lon;
+      byId("mapFrame").src = "https://www.openstreetmap.org/export/embed.html?bbox=" +
+        (lon - 0.05) + "," + (lat - 0.05) + "," + (lon + 0.05) + "," + (lat + 0.05) +
+        "&layer=mapnik&marker=" + lat + "," + lon;
+    }
+
+    function shortName(name) {
+      return String(name || "Selected location").split(",").slice(0, 3).join(", ");
+    }
+  </script>
 </body>
 </html>
